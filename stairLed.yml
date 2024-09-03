@@ -1,0 +1,660 @@
+### stairLedLight main
+substitutions:
+  devicename: stairledlight
+  upperDevicename: stair Led Light
+  maxBright: "70"       # maximum brightness for the leds to reach (in %)
+  nightBright: "30"     # brightness for always-on during night
+  transLenghtOn: "1.5"  # time for transition from Off to On
+  delayLenghtOn: "0.25" # delay between turining on the next step
+  transLenghtOff: "3"   # time for tranistion from On to Off
+  delayLenghtOff: "0.5" # delay between turning off the next step
+  stayOn: "128"        # duration of time the lights stay on after all lights are turned on
+
+esphome:
+  name: $devicename
+  platform: ESP32
+  board: esp32-poe
+
+packages:
+  # wifi: !include common/wifi.yml
+  ethernet: !include common/ethernet.yml
+  api: !include common/api.yml
+  ota: !include common/ota.yml
+  # mqtt: !include common/mqtt.yml
+  logger: !include common/logger.yml
+  sun: !include common/sun.yml
+  time: !include common/time.yml
+  web_server: !include common/webserver.yml
+
+i2c:
+  scan: True
+
+# load module for PCA9685 16-Channel 12-bit PWM/Servo Driver I2C
+# datasheet https://www.nxp.com/docs/en/data-sheet/PCA9685.pdf
+pca9685:
+  - frequency: 1000
+
+#Define PCA9685 PWM chnnels and register them as outputs in ESPHome
+# pins 0-15 are defined as channel 0-15
+output:
+  - platform: pca9685
+    id: pca1_0
+    channel: 15
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_1
+    channel: 14
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_2
+    channel: 13
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_3
+    channel: 12
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_4
+    channel: 11
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_5
+    channel: 10
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_6
+    channel: 9
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_7
+    channel: 8
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_8
+    channel: 7
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_9
+    channel: 6
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_10
+    channel: 5
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_11
+    channel: 4
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_12
+    channel: 3
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_13
+    channel: 2
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_14
+    channel: 1
+    inverted: False
+
+  - platform: pca9685
+    id: pca1_15
+    channel: 0
+    inverted: False
+
+# Define LED drivers as light components for esphome and hass automations
+# https://esphome.io/components/light/index.html
+light:  
+  - platform: monochromatic
+    name: "step01"
+    id: step1
+    output: pca1_0
+
+  - platform: monochromatic
+    name: "step02"
+    id: step2
+    output: pca1_1
+
+  - platform: monochromatic
+    name: "step03"
+    id: step3
+    output: pca1_2
+
+  - platform: monochromatic
+    name: "step04"
+    id: step4
+    output: pca1_3
+    
+  - platform: monochromatic
+    name: "step05"
+    id: step5
+    output: pca1_4
+        
+  - platform: monochromatic
+    name: "step06"
+    id: step6
+    output: pca1_5
+        
+  - platform: monochromatic
+    name: "step07"
+    id: step7
+    output: pca1_6
+        
+  - platform: monochromatic
+    name: "step08"
+    id: step8
+    output: pca1_7
+    
+  - platform: monochromatic
+    name: "step09"
+    id: step9
+    output: pca1_8
+        
+  - platform: monochromatic
+    name: "step10"
+    id: step10
+    output: pca1_9
+        
+  - platform: monochromatic
+    name: "step11"
+    id: step11
+    output: pca1_10
+
+  - platform: monochromatic
+    name: "step12"
+    id: step12
+    output: pca1_11
+        
+  - platform: monochromatic
+    name: "step13"
+    id: step13
+    output: pca1_12
+        
+  - platform: monochromatic
+    name: "step14"
+    id: step14
+    output: pca1_13
+    
+  - platform: monochromatic
+    name: "step15"
+    id: step15
+    output: pca1_14
+
+  - platform: monochromatic
+    name: "step16"
+    id: step16
+    output: pca1_15
+
+# number:
+#   name: count
+#   internal: true
+
+script:
+  - id: fadeOnBottomTop
+    mode: single
+    then:
+    - light.turn_on:
+        id: step1
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    # - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step2
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    # - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step3
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s  
+    - light.turn_on:
+        id: step4
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step5
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step6
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step7
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step8
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step9
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step10
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step11
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step12
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step13
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step14
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step15
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step16
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${stayOn}s
+
+  - id: fadeOffBootomTop
+    then:
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step1
+              transition_length: ${transLenghtOff}s
+          - delay: ${delayLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step1
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
+    - light.turn_off:
+        id: step2
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step3
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step4
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step5
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step6
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step7
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step8
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step9
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step10
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step11
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step12
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step13
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step14
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step15
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step16
+              transition_length: ${transLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step16
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
+
+  - id: fadeOnTopBottom
+    mode: single
+    then:
+    - light.turn_on:
+        id: step16
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step15
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step14
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step13
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step12
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step11
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step10
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step9
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step8
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step7
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step6
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step5
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step4
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step3
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step2
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${delayLenghtOn}s
+    - light.turn_on:
+        id: step1
+        brightness: ${maxBright}%
+        transition_length: ${transLenghtOn}s
+    - delay: ${stayOn}s
+
+  - id: fadeOffTopBootom
+    then:
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step16
+              transition_length: ${transLenghtOff}s
+          - delay: ${delayLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step16
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
+    - light.turn_off:
+        id: step15
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step14
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step13
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step12
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step11
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step10
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step9
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step8
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step7
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step6
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step5
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step4
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step3
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - light.turn_off:
+        id: step2
+        transition_length: ${transLenghtOff}s
+    - delay: ${delayLenghtOff}s
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step1
+              transition_length: ${transLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step1
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
+  
+  - id: nightMode
+    then:
+    - light.turn_on:
+        id: step1
+        brightness: ${nightBright}%
+    - light.turn_on:
+        id: step16
+        brightness: ${nightBright}%
+
+  # - id: turnOn
+  #   then:
+  #     - number.set:
+  #         id: count
+  #         value: 0
+  #     - repeat:
+  #         count: 3
+  #         then:
+  #           - light.turn_on:
+  #               id: step${count}
+button:
+  # restart the controller from HA button  
+  - platform: restart
+    name: $upperDevicename Restart
+
+  # Trigger bottom-top fade on
+  - platform: template
+    name: fadeOnBottomTop
+    on_press:
+      then:
+        - script.execute: fadeOnBottomTop
+
+  # Trigger bottom-top fade off
+  - platform: template
+    name: fadeOffBootomTop
+    on_press:
+      then:
+        - script.execute: fadeOffBootomTop
+
+# Trigger top-bottom fade on
+  - platform: template
+    name: fadeOnTopBottom
+    on_press:
+      then:
+        - script.execute: fadeOnTopBottom
+
+# Trigger top-bottom fade off
+  - platform: template
+    name: fadeOffTopBootom
+    on_press:
+      then:
+        - script.execute: fadeOffTopBootom
+
+# Trigger nightMode
+  - platform: template
+    name: nightMode
+    on_press:
+      - script.execute: nightMode
+
+binary_sensor:
+  - platform: template
+    name: ledOn
+    id: ledOn
+    internal: True
+
+# switch:
+  - platform: gpio
+    name: bottomPir
+    pin: 
+      number: 36
+      mode: 
+        input: true
+        # pulldown: true
+    device_class: motion
+    filters:
+      - delayed_off: 10s
+    on_press:
+      then:
+        # - if:
+        #     condition:
+        #       - light.is_off: step2
+        #     then:
+              - script.stop: fadeOnTopBottom
+              - script.stop: fadeOffTopBootom
+              - script.execute: fadeOnBottomTop
+              - script.wait: fadeOnBottomTop
+              - script.execute: fadeOffBootomTop
+
+  - platform: gpio
+    name: topPir
+    pin: 
+      number: 14
+      mode: 
+        input: true
+        pulldown: true
+    device_class: motion
+    filters:
+      - delayed_off: 10s
+    on_press:
+      then:
+        # - if:
+        #     condition:
+        #       - light.is_off: step15
+        #     then:
+              - script.stop: fadeOnBottomTop
+              - script.stop: fadeOffBootomTop
+              - script.execute: fadeOnTopBottom
+              - script.wait: fadeOnTopBottom
+              - script.execute: fadeOffTopBootom
+
+# Temp sensor
+sensor:
+  - platform: bmp085
+    temperature:
+      name: "$upperDevicename enclosure Temperature"
+    pressure:
+      name: "$upperDevicename enclosure Pressure"
+    update_interval: 300s
