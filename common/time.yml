@@ -1,0 +1,6 @@
+# Get network time from NTP pool
+time:
+  - platform: sntp
+    timezone: !secret timezone
+    servers: bg.pool.ntp.org
+    id: esptime
