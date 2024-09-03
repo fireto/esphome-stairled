@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "FDD8447L")(type "KiCad")(uri "/home/pstoyanov/git/projects/esphome-illuminatio/Hardware/Revision 0.2/LightControllerLibs/FDD8447L.kicad_sym")(options "")(descr ""))
+)
