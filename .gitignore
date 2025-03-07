@@ -33,8 +33,9 @@ bld/
 .esphome
 
 # ignore passwords
-secrets.*
+**/secrets.*
 common/secrets.yaml
+/secrets.yaml
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -363,3 +364,13 @@ MigrationBackup/
 
 # KiCad backup files
 Hardware/stairLed/stairLed-backups
+
+# Gitignore settings for ESPHome
+**/.esphome/
+**/.pioenvs/
+**/.piolibdeps/
+**/lib/
+**/src/
+**/platformio.ini
+**/platformio/
+**/secrets.yaml
