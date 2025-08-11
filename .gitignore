@@ -30,15 +30,15 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+yardgate/
 .esphome
 
 # ignore passwords
-**/secrets.*
-common/secrets.yaml
-/secrets.yaml
+secrets.*
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+.vscode/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -374,3 +374,7 @@ Hardware/stairLed/stairLed-backups
 **/platformio.ini
 **/platformio/
 **/secrets.yaml
+**secrets.yaml
+**/secrets.*
+common/secrets.yaml
+/secrets.yaml

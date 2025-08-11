@@ -8,13 +8,16 @@ substitutions:
   delayLenghtOn: "0.25" # delay between turining on the next step
   transLenghtOff: "3"   # time for tranistion from On to Off
   delayLenghtOff: "0.5" # delay between turning off the next step
-  stayOn: "128"        # duration of time the lights stay on after all lights are turned on
+  stayOn: "256"        # duration of time the lights stay on after all lights are turned on
 
 esphome:
   name: $devicename
 
 esp32:
   board: esp32-poe
+  framework:
+    type: esp-idf
+    version: latest
 
 packages:
   # wifi: !include common/wifi.yml
@@ -26,6 +29,10 @@ packages:
   sun: !include common/sun.yml
   time: !include common/time.yml
   web_server: !include common/webserver.yml
+
+external_components:
+  - source: github://muxa/esphome-state-machine@main
+    components: [state_machine]
 
 i2c:
   scan: True
@@ -336,15 +343,24 @@ script:
         id: step16
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
-    - delay: ${stayOn}s
+    # - delay: ${stayOn}s
 
-  - id: fadeOffBootomTop
+  - id: fadeOffBottomTop
     mode: single
     then:
-    - light.turn_off:
-        id: step1
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step1
+              transition_length: ${transLenghtOff}s
+          - delay: ${delayLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step1
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
     - light.turn_off:
         id: step2
         transition_length: ${transLenghtOff}s
@@ -404,10 +420,18 @@ script:
     - light.turn_off:
         id: step16
         transition_length: ${transLenghtOff}s
-    - light.turn_on:
-        id: step16
-        transition_length: ${transLenghtOff}0s
-        brightness: ${nightBright}%
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step16
+              transition_length: ${transLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step16
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
 
   - id: fadeOnOffBottomTop
     mode: single
@@ -657,19 +681,23 @@ script:
         id: step1
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
-    - delay: ${stayOn}s
+    # - delay: ${stayOn}s
 
-  - id: fadeOffTopBootom
+  - id: fadeOffTopBottom
     then:
     #start turning off top to bottom
-    - light.turn_off:
-        id: step16
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_on:
-        id: step16
-        transition_length: ${transLenghtOff}0s
-        brightness: ${nightBright}%
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step16
+              transition_length: ${transLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step16
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
     - light.turn_off:
         id: step15
         transition_length: ${transLenghtOff}s
@@ -726,13 +754,19 @@ script:
         id: step2
         transition_length: ${transLenghtOff}s
     - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step1
-        transition_length: ${transLenghtOff}s
-    - light.turn_on:
-        id: step1
-        transition_length: ${transLenghtOff}0s
-        brightness: ${nightBright}%
+    - if:
+        condition:
+          - sun.is_above_horizon:
+        then:
+          - light.turn_off:
+              id: step1
+              transition_length: ${transLenghtOff}s
+          - delay: ${delayLenghtOff}s
+        else:
+          - light.turn_on:
+              id: step1
+              transition_length: ${transLenghtOff}0s
+              brightness: ${nightBright}%
 
   - id: fadeOnOffTopBottom
     mode: single
@@ -1076,17 +1110,15 @@ script:
               id: step16
               transition_length: ${transLenghtOff}0s
               brightness: ${nightBright}%
+
+  - id: timerScript
+    mode: restart 
+    then:
+      - logger.log: "Staircase timer started/restarted."
+      - delay: ${stayOn}s
+      - logger.log: "Staircase timer finished. Triggering turn off."
+      - state_machine.transition: idleTimeout
     
-  # - id: turnOn
-  #   then:
-  #     - number.set:
-  #         id: count
-  #         value: 0
-  #     - repeat:
-  #         count: 3
-  #         then:
-  #           - light.turn_on:
-  #               id: step${count}
 button:
   # restart the controller from HA button  
   - platform: restart
@@ -1101,10 +1133,10 @@ button:
 
   # Trigger bottom-top fade off
   - platform: template
-    name: fadeOffBootomTop
+    name: fadeOffBottomTop
     on_press:
       then:
-        - script.execute: fadeOffBootomTop
+        - script.execute: fadeOffBottomTop
 
 # Trigger top-bottom fade on
   - platform: template
@@ -1115,10 +1147,10 @@ button:
 
 # Trigger top-bottom fade off
   - platform: template
-    name: fadeOffTopBootom
+    name: fadeOffTopBottom
     on_press:
       then:
-        - script.execute: fadeOffTopBootom
+        - script.execute: fadeOffTopBottom
 
 # Trigger nightMode
   - platform: template
@@ -1128,13 +1160,14 @@ button:
 
 # stop all scripts
   - platform: template
-    name: stop_all_scripts
+    name: stopAllScripts
+    id: stopAllScripts
     on_press:
       - script.stop: fadeOnTopBottom
-      - script.stop: fadeOffTopBootom
+      - script.stop: fadeOffTopBottom
       - script.stop: fadeOnOffTopBottom
       - script.stop: fadeOnBottomTop
-      - script.stop: fadeOffBootomTop
+      - script.stop: fadeOffBottomTop
       - script.stop: fadeOnOffBottomTop
       - script.stop: halloween
 
@@ -1144,7 +1177,7 @@ button:
     on_press:
       - script.execute: halloween
 
-# switch:
+binary_sensor:
   - platform: gpio
     name: bottomPir
     pin: 
@@ -1156,9 +1189,7 @@ button:
     filters:
       - delayed_off: 10s
     on_press:
-      then:
-        - script.stop: fadeOnOffTopBottom
-        - script.execute: fadeOnOffBottomTop
+      - state_machine.transition: pirBottomDetected
 
   - platform: gpio
     name: topPir
@@ -1171,11 +1202,52 @@ button:
     filters:
       - delayed_off: 10s
     on_press:
-      then:
-        - script.stop: fadeOnOffBottomTop
-        - script.execute: fadeOnOffTopBottom
+      - state_machine.transition: pirTopDetected
 
-# Temp sensor
+## define state machine
+state_machine:
+  - id: staircaseStateMachine
+    name: "Staircase Lights"
+    initial_state: unOccupied
+    states:
+      - name: unOccupied
+        on_enter:
+          - logger.log: "Entering unOccupied state. Lights are off."
+      - name: occupiedBottom
+        on_enter:
+          - logger.log: "Entering occupiedBottom state."
+          - script.execute: fadeOnBottomTop
+          - script.execute: timerScript
+        on_leave:
+          - logger.log: "Exiting occupiedBottom state."
+          - script.execute: fadeOffBottomTop
+      - name: occupiedTop
+        on_enter:
+          - logger.log: "Entering occupiedTop state."
+          - script.execute: fadeOnTopBottom
+          - script.execute: timerScript
+        on_leave:
+          - logger.log: "Exiting occupiedTop state."
+          - script.execute: fadeOffTopBottom
+    inputs:
+      - name: pirBottomDetected
+        transitions:
+          - unOccupied -> occupiedBottom
+          - occupiedTop -> unOccupied
+      - name: pirTopDetected
+        transitions:
+          - unOccupied -> occupiedTop
+          - occupiedBottom -> unOccupied
+      - name: idleTimeout
+        transitions:
+          - occupiedTop -> unOccupied
+          - occupiedBottom -> unOccupied
+
+text_sensor:
+  - platform: state_machine
+    name: "Staircase State"
+
+# Temperature sensor
 sensor:
   - platform: bmp085
     temperature:
