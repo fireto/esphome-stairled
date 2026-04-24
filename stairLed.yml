@@ -1,6 +1,7 @@
 ### stairLedLight main
 substitutions:
   devicename: stairledlight
+  domainName: .example.local
   upperDevicename: stair Led Light
   maxBright: "70"       # maximum brightness for the leds to reach (in %)
   nightBright: "30"     # brightness for always-on during night
@@ -12,12 +13,16 @@ substitutions:
 
 esphome:
   name: $devicename
+  on_boot:
+    - priority: 1000
+      then:
+        - logger.set_level: WARN
 
 esp32:
   board: esp32-poe
   framework:
     type: esp-idf
-    version: latest
+    # version: latest
 
 packages:
   # wifi: !include common/wifi.yml
