@@ -4,12 +4,13 @@ substitutions:
   domainName: .example.local
   upperDevicename: stair Led Light
   maxBright: "70"       # maximum brightness for the leds to reach (in %)
-  nightBright: "30"     # brightness for always-on during night
+  nightBright: "25"     # brightness for always-on during night
   transLenghtOn: "1.5"  # time for transition from Off to On
-  delayLenghtOn: "0.25" # delay between turining on the next step
-  transLenghtOff: "3"   # time for tranistion from On to Off
+  delayLenghtOn: "0.2" # delay between turining on the next step
+  transLenghtOff: "4"   # time for tranistion from On to Off
   delayLenghtOff: "0.5" # delay between turning off the next step
   stayOn: "256"        # duration of time the lights stay on after all lights are turned on
+  nightTransLength: "40" # transition length for fading to night brightness
 
 esphome:
   name: $devicename
@@ -23,6 +24,8 @@ esp32:
   framework:
     type: esp-idf
     # version: latest
+    advanced:
+      minimum_chip_revision: "3.0"
 
 packages:
   # wifi: !include common/wifi.yml
@@ -364,7 +367,7 @@ script:
         else:
           - light.turn_on:
               id: step1
-              transition_length: ${transLenghtOff}0s
+              transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
     - light.turn_off:
         id: step2
@@ -422,9 +425,6 @@ script:
         id: step15
         transition_length: ${transLenghtOff}s
     - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step16
-        transition_length: ${transLenghtOff}s
     - if:
         condition:
           - sun.is_above_horizon:
@@ -435,174 +435,17 @@ script:
         else:
           - light.turn_on:
               id: step16
-              transition_length: ${transLenghtOff}0s
+              transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
 
   - id: fadeOnOffBottomTop
     mode: single
     then:
-    - light.turn_on:
-        id: step1
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    # - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step2
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    # - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step3
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s  
-    - light.turn_on:
-        id: step4
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step5
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step6
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step7
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step8
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step9
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step10
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step11
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step12
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step13
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step14
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step15
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step16
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${stayOn}s
-    # start turning off
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step1
-              transition_length: ${transLenghtOff}s
-          - delay: ${delayLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step1
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
-    - light.turn_off:
-        id: step2
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step3
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step4
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step5
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step6
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step7
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step8
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step9
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step10
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step11
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step12
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step13
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step14
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step15
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step16
-              transition_length: ${transLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step16
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
+      - script.execute: fadeOnBottomTop
+      - script.wait: fadeOnBottomTop
+      - delay: ${stayOn}s
+      - script.execute: fadeOffBottomTop
+      - script.wait: fadeOffBottomTop
 
   - id: fadeOnTopBottom
     mode: single
@@ -689,6 +532,7 @@ script:
     # - delay: ${stayOn}s
 
   - id: fadeOffTopBottom
+    mode: single
     then:
     #start turning off top to bottom
     - if:
@@ -698,10 +542,11 @@ script:
           - light.turn_off:
               id: step16
               transition_length: ${transLenghtOff}s
+          - delay: ${delayLenghtOff}s
         else:
           - light.turn_on:
               id: step16
-              transition_length: ${transLenghtOff}0s
+              transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
     - light.turn_off:
         id: step15
@@ -770,185 +615,41 @@ script:
         else:
           - light.turn_on:
               id: step1
-              transition_length: ${transLenghtOff}0s
+              transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
 
   - id: fadeOnOffTopBottom
     mode: single
     then:
-    #start turning on top to bottom
-    - light.turn_on:
-        id: step16
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step15
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step14
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step13
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step12
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step11
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step10
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step9
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step8
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step7
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step6
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step5
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step4
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step3
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step2
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    - delay: ${delayLenghtOn}s
-    - light.turn_on:
-        id: step1
-        brightness: ${maxBright}%
-        transition_length: ${transLenghtOn}s
-    #stay on for ${stayOn} seconds
-    - delay: ${stayOn}s
-    #start turning off top to bottom
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step16
-              transition_length: ${transLenghtOff}s
-          - delay: ${delayLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step16
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
-    - light.turn_off:
-        id: step15
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step14
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step13
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step12
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step11
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step10
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step9
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step8
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step7
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step6
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step5
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step4
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step3
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step2
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step1
-              transition_length: ${transLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step1
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
+      - script.execute: fadeOnTopBottom
+      - script.wait: fadeOnTopBottom
+      - delay: ${stayOn}s
+      - script.execute: fadeOffTopBottom
+      - script.wait: fadeOffTopBottom
+
+  - id: stopAll
+    then:
+      - script.stop: fadeOnTopBottom
+      - script.stop: fadeOffTopBottom
+      - script.stop: fadeOnOffTopBottom
+      - script.stop: fadeOnBottomTop
+      - script.stop: fadeOffBottomTop
+      - script.stop: fadeOnOffBottomTop
+      - script.stop: halloween
+      - script.stop: timerScript
 
   - id: nightMode
     then:
-    - light.turn_on:
-        id: step1
-        brightness: ${nightBright}%
-    - light.turn_on:
-        id: step16
-        brightness: ${nightBright}%
+      - state_machine.transition: idleTimeout
+      - script.execute: stopAll
+      - script.execute: fadeOffBottomTop
+      - script.wait: fadeOffBottomTop
+      - light.turn_on:
+          id: step1
+          brightness: ${nightBright}%
+      - light.turn_on:
+          id: step16
+          brightness: ${nightBright}%
 
   - id: halloween
     mode: single
@@ -1033,88 +734,8 @@ script:
         brightness: ${maxBright}%
         effect: flicker
     - delay: ${stayOn}s
-    # start turning off
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step1
-              transition_length: ${transLenghtOff}s
-          - delay: ${delayLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step1
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
-    - light.turn_off:
-        id: step2
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step3
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step4
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step5
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step6
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step7
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step8
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step9
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step10
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step11
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step12
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step13
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step14
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - light.turn_off:
-        id: step15
-        transition_length: ${transLenghtOff}s
-    - delay: ${delayLenghtOff}s
-    - if:
-        condition:
-          - sun.is_above_horizon:
-        then:
-          - light.turn_off:
-              id: step16
-              transition_length: ${transLenghtOff}s
-        else:
-          - light.turn_on:
-              id: step16
-              transition_length: ${transLenghtOff}0s
-              brightness: ${nightBright}%
+    - script.execute: fadeOffBottomTop
+    - script.wait: fadeOffBottomTop
 
   - id: timerScript
     mode: restart 
@@ -1168,13 +789,7 @@ button:
     name: stopAllScripts
     id: stopAllScripts
     on_press:
-      - script.stop: fadeOnTopBottom
-      - script.stop: fadeOffTopBottom
-      - script.stop: fadeOnOffTopBottom
-      - script.stop: fadeOnBottomTop
-      - script.stop: fadeOffBottomTop
-      - script.stop: fadeOnOffBottomTop
-      - script.stop: halloween
+      - script.execute: stopAll
 
 # Trigger halloween mode  
   - platform: template
@@ -1225,6 +840,8 @@ state_machine:
           - script.execute: timerScript
         on_leave:
           - logger.log: "Exiting occupiedBottom state."
+          - script.stop: fadeOnBottomTop
+          - script.stop: timerScript
           - script.execute: fadeOffBottomTop
       - name: occupiedTop
         on_enter:
@@ -1233,6 +850,8 @@ state_machine:
           - script.execute: timerScript
         on_leave:
           - logger.log: "Exiting occupiedTop state."
+          - script.stop: fadeOnTopBottom
+          - script.stop: timerScript
           - script.execute: fadeOffTopBottom
     inputs:
       - name: pirBottomDetected
