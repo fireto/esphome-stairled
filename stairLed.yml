@@ -879,3 +879,7 @@ sensor:
     pressure:
       name: "$upperDevicename enclosure Pressure"
     update_interval: 300s
+
+  - platform: internal_temperature
+    name: "ESP32-POE Internal Temperature"
+    update_interval: 60s
