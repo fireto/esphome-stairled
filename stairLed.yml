@@ -351,7 +351,9 @@ script:
         id: step16
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
-    # animation finished climbing bottom -> top: notify HA (reached the top)
+    # ceiling = "step 17": wait for the last step to finish reaching max, then
+    # notify HA so the 2nd-floor ceiling comes on as the next step (not mid-fade)
+    - delay: ${transLenghtOn}s
     - event.trigger:
         id: staircase_event
         event_type: "ascended"
@@ -441,6 +443,11 @@ script:
               id: step16
               transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
+    # OFF animation finished: let the 2nd-floor ceiling fade out as the last step
+    - delay: ${transLenghtOff}s
+    - event.trigger:
+        id: staircase_event
+        event_type: "ascended_off"
 
   - id: fadeOnOffBottomTop
     mode: single
@@ -533,7 +540,9 @@ script:
         id: step1
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
-    # animation finished climbing top -> bottom: notify HA (reached the bottom)
+    # ceiling = "step 17": wait for the last step to finish reaching max, then
+    # notify HA so the 1st-floor ceiling comes on as the next step (not mid-fade)
+    - delay: ${transLenghtOn}s
     - event.trigger:
         id: staircase_event
         event_type: "descended"
@@ -625,6 +634,11 @@ script:
               id: step1
               transition_length: ${nightTransLength}s
               brightness: ${nightBright}%
+    # OFF animation finished: let the 1st-floor ceiling fade out as the last step
+    - delay: ${transLenghtOff}s
+    - event.trigger:
+        id: staircase_event
+        event_type: "descended_off"
 
   - id: fadeOnOffTopBottom
     mode: single
@@ -887,8 +901,10 @@ event:
     name: "Staircase Motion"
     id: staircase_event
     event_types:
-      - "ascended"   # finished lighting bottom -> top (heading to 2nd floor)
-      - "descended"  # finished lighting top -> bottom (heading to 1st floor)
+      - "ascended"       # last step (bottom -> top) reached max: light 2nd-floor ceiling
+      - "descended"      # last step (top -> bottom) reached max: light 1st-floor ceiling
+      - "ascended_off"   # bottom->top OFF animation finished: clear 2nd-floor ceiling
+      - "descended_off"  # top->bottom OFF animation finished: clear 1st-floor ceiling
 
 # Temperature sensor
 sensor:
