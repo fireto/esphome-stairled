@@ -351,6 +351,10 @@ script:
         id: step16
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
+    # animation finished climbing bottom -> top: notify HA (reached the top)
+    - event.trigger:
+        id: staircase_event
+        event_type: "ascended"
     # - delay: ${stayOn}s
 
   - id: fadeOffBottomTop
@@ -529,6 +533,10 @@ script:
         id: step1
         brightness: ${maxBright}%
         transition_length: ${transLenghtOn}s
+    # animation finished climbing top -> bottom: notify HA (reached the bottom)
+    - event.trigger:
+        id: staircase_event
+        event_type: "descended"
     # - delay: ${stayOn}s
 
   - id: fadeOffTopBottom
@@ -870,6 +878,17 @@ state_machine:
 text_sensor:
   - platform: state_machine
     name: "Staircase State"
+
+# Semantic events for HA: fired when a climb animation completes, so HA
+# automations can act on "person reached the top/bottom" (turn on the
+# arrival-floor ceiling light, etc.) without hardcoding HA entities here.
+event:
+  - platform: template
+    name: "Staircase Motion"
+    id: staircase_event
+    event_types:
+      - "ascended"   # finished lighting bottom -> top (heading to 2nd floor)
+      - "descended"  # finished lighting top -> bottom (heading to 1st floor)
 
 # Temperature sensor
 sensor:
