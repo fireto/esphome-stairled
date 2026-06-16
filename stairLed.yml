@@ -49,6 +49,13 @@ i2c:
 # datasheet https://www.nxp.com/docs/en/data-sheet/PCA9685.pdf
 pca9685:
   - frequency: 1000
+    # Default "linear" phase-staggers each channel's PWM start, which makes the
+    # high-numbered channels' pulses wrap past the cycle reset. Rewriting those
+    # wrapped pulses mid-cycle (the driver rewrites all channels on every change)
+    # glitches the steady steps -> steps 1-5 (channels 11-15) flicker during fades.
+    # "none" starts every channel at phase 0 so no pulse wraps. Tradeoff: all
+    # channels rise together -> slightly higher per-cycle inrush current.
+    phase_balancer: none
 
 #Define PCA9685 PWM chnnels and register them as outputs in ESPHome
 # pins 0-15 are defined as channel 0-15
@@ -829,7 +836,7 @@ binary_sensor:
         # pulldown: true
     device_class: motion
     filters:
-      - delayed_off: 10s
+      - delayed_off: 2s
     on_press:
       - state_machine.transition: pirBottomDetected
 
@@ -842,7 +849,7 @@ binary_sensor:
         pulldown: true
     device_class: motion
     filters:
-      - delayed_off: 10s
+      - delayed_off: 2s
     on_press:
       - state_machine.transition: pirTopDetected
 
@@ -858,6 +865,10 @@ state_machine:
       - name: occupiedBottom
         on_enter:
           - logger.log: "Entering occupiedBottom state."
+          # Cancel any in-flight fade (esp. an off-fade still draining from a
+          # previous session) before starting the on-fade, so the two don't
+          # run concurrently and fight over the step outputs.
+          - script.execute: stopAll
           - script.execute: fadeOnBottomTop
           - script.execute: timerScript
         on_leave:
@@ -868,6 +879,10 @@ state_machine:
       - name: occupiedTop
         on_enter:
           - logger.log: "Entering occupiedTop state."
+          # Cancel any in-flight fade (esp. an off-fade still draining from a
+          # previous session) before starting the on-fade, so the two don't
+          # run concurrently and fight over the step outputs.
+          - script.execute: stopAll
           - script.execute: fadeOnTopBottom
           - script.execute: timerScript
         on_leave:
