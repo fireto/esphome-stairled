@@ -1,7 +1,6 @@
 ### stairLedLight main
 substitutions:
   devicename: stairledlight
-  domainName: .example.local
   upperDevicename: stair Led Light
   maxBright: "70"       # maximum brightness for the leds to reach (in %)
   nightBright: "25"     # brightness for always-on during night

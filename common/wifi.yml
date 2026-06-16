@@ -2,10 +2,7 @@
 wifi:
   ssid: !secret vnAutomationWifiSsid
   password: !secret vnAutomationWifiPwd
-  # ssid: !secret vnBorovetsSashoSsid
-  # password: !secret vnBorovetsSashoPwd
-  # ssid: !secret vnCommonWifiSsid
-  # password: !secret vnCommonWifiPwd
+  domain: !secret domainName
   
 # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:

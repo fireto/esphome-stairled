@@ -11,4 +11,4 @@ ethernet:
   power_pin:
     number: GPIO12
     ignore_strapping_warning: true
-  domain: $domainName
+  domain: !secret domainName
